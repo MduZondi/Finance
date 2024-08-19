@@ -1,9 +1,5 @@
 import streamlit as st
 import pandas as pd
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 
 # Function to calculate PAYE
 def calculate_paye(gross_salary, allowances, fringe_benefits, retirement_deductions, medical_credits, tax_rate, rebates):
@@ -59,31 +55,6 @@ def what_if_analysis(gross_salary, proposed_increase, tax_rate):
 # Function to create a DataFrame for exporting
 def create_dataframe(data, columns):
     return pd.DataFrame([data], columns=columns)
-
-# Function to generate a PDF using reportlab
-def generate_pdf_reportlab(data, title, filename):
-    doc = SimpleDocTemplate(filename, pagesize=A4)
-    elements = []
-    
-    styles = getSampleStyleSheet()
-    title_paragraph = Paragraph(title, styles['Title'])
-    elements.append(title_paragraph)
-    
-    table_data = [[key, value] for key, value in data.items()]
-    table = Table(table_data)
-    
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ]))
-    
-    elements.append(table)
-    doc.build(elements)
 
 # Main application
 def main():
@@ -204,10 +175,6 @@ def main():
                 df = create_dataframe(list(income_statement_data.values()), list(income_statement_data.keys()))
                 df.to_excel("Income_Statement.xlsx", index=False)
                 st.success("Income Statement exported to Excel successfully!")
-    
-            if st.button("Export to PDF"):
-                generate_pdf_reportlab(income_statement_data, "Income Statement", "Income_Statement.pdf")
-                st.success("Income Statement exported to PDF successfully!")
 
         elif statement_type == "Balance Sheet":
             st.subheader("Balance Sheet")
@@ -239,10 +206,6 @@ def main():
                 df = create_dataframe(list(balance_sheet_data.values()), list(balance_sheet_data.keys()))
                 df.to_excel("Balance_Sheet.xlsx", index=False)
                 st.success("Balance Sheet exported to Excel successfully!")
-    
-            if st.button("Export Balance Sheet to PDF"):
-                generate_pdf_reportlab(balance_sheet_data, "Balance Sheet", "Balance_Sheet.pdf")
-                st.success("Balance Sheet exported to PDF successfully!")
 
         elif statement_type == "Cash Flow Statement":
             st.subheader("Cash Flow Statement")
@@ -276,10 +239,7 @@ def main():
                 df = create_dataframe(list(cash_flow_data.values()), list(cash_flow_data.keys()))
                 df.to_excel("Cash_Flow_Statement.xlsx", index=False)
                 st.success("Cash Flow Statement exported to Excel successfully!")
-    
-            if st.button("Export Cash Flow Statement to PDF"):
-                generate_pdf_reportlab(cash_flow_data, "Cash Flow Statement", "Cash_Flow_Statement.pdf")
-                st.success("Cash Flow Statement exported to PDF successfully!")
 
 if __name__ == "__main__":
     main()
+
