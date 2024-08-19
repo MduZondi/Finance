@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
-from fpdf import FPDF
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 
 # Function to calculate PAYE
 def calculate_paye(gross_salary, allowances, fringe_benefits, retirement_deductions, medical_credits, tax_rate, rebates):
@@ -57,17 +60,30 @@ def what_if_analysis(gross_salary, proposed_increase, tax_rate):
 def create_dataframe(data, columns):
     return pd.DataFrame([data], columns=columns)
 
-# Function to generate a PDF
-def generate_pdf(data, title, filename):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=title, ln=True, align='C')
+# Function to generate a PDF using reportlab
+def generate_pdf_reportlab(data, title, filename):
+    doc = SimpleDocTemplate(filename, pagesize=A4)
+    elements = []
     
-    for key, value in data.items():
-        pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+    styles = getSampleStyleSheet()
+    title_paragraph = Paragraph(title, styles['Title'])
+    elements.append(title_paragraph)
     
-    pdf.output(filename)
+    table_data = [[key, value] for key, value in data.items()]
+    table = Table(table_data)
+    
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
 
 # Main application
 def main():
@@ -190,7 +206,7 @@ def main():
                 st.success("Income Statement exported to Excel successfully!")
     
             if st.button("Export to PDF"):
-                generate_pdf(income_statement_data, "Income Statement", "Income_Statement.pdf")
+                generate_pdf_reportlab(income_statement_data, "Income Statement", "Income_Statement.pdf")
                 st.success("Income Statement exported to PDF successfully!")
 
         elif statement_type == "Balance Sheet":
@@ -225,7 +241,7 @@ def main():
                 st.success("Balance Sheet exported to Excel successfully!")
     
             if st.button("Export Balance Sheet to PDF"):
-                generate_pdf(balance_sheet_data, "Balance Sheet", "Balance_Sheet.pdf")
+                generate_pdf_reportlab(balance_sheet_data, "Balance Sheet", "Balance_Sheet.pdf")
                 st.success("Balance Sheet exported to PDF successfully!")
 
         elif statement_type == "Cash Flow Statement":
@@ -262,7 +278,7 @@ def main():
                 st.success("Cash Flow Statement exported to Excel successfully!")
     
             if st.button("Export Cash Flow Statement to PDF"):
-                generate_pdf(cash_flow_data, "Cash Flow Statement", "Cash_Flow_Statement.pdf")
+                generate_pdf_reportlab(cash_flow_data, "Cash Flow Statement", "Cash_Flow_Statement.pdf")
                 st.success("Cash Flow Statement exported to PDF successfully!")
 
 if __name__ == "__main__":
