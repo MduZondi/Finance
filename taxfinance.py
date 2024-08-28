@@ -13,7 +13,7 @@ def calculate_uif(gross_salary):
     employee_uif = gross_salary * 0.01
     employer_uif = gross_salary * 0.01
     total_uif = employee_uif + employer_uif
-    return round(total_uif, 2)
+    return round(total_uif, 2), round(employee_uif, 2), round(employer_uif, 2)
 
 # Function to calculate SDL
 def calculate_sdl(gross_salary):
@@ -52,6 +52,33 @@ def what_if_analysis(gross_salary, proposed_increase, tax_rate):
     new_paye = calculate_paye(new_salary, 0, 0, 0, 0, tax_rate/100, 0)
     return round(new_salary, 2), round(new_paye, 2)
 
+# Function to handle multiple employees
+def process_multiple_employees(employee_data):
+    results = []
+    for employee in employee_data:
+        gross_salary = employee['Gross Salary']
+        allowances = employee['Allowances']
+        fringe_benefits = employee['Fringe Benefits']
+        retirement_deductions = employee['Retirement Deductions']
+        medical_credits = employee['Medical Credits']
+        tax_rate = employee['Tax Rate']
+        rebates = employee['Rebates']
+        
+        paye = calculate_paye(gross_salary, allowances, fringe_benefits, retirement_deductions, medical_credits, tax_rate / 100, rebates)
+        total_uif, employee_uif, employer_uif = calculate_uif(gross_salary)
+        sdl = calculate_sdl(gross_salary)
+        
+        results.append({
+            "Employee": employee['Employee Name'],
+            "Gross Salary": gross_salary,
+            "PAYE": paye,
+            "Total UIF": total_uif,
+            "Employee UIF": employee_uif,
+            "Employer UIF": employer_uif,
+            "SDL": sdl
+        })
+    return pd.DataFrame(results)
+
 # Function to create a DataFrame for exporting
 def create_dataframe(data, columns):
     return pd.DataFrame([data], columns=columns)
@@ -62,12 +89,45 @@ def main():
 
     st.sidebar.title("Navigation")
     menu = st.sidebar.radio("Select a Calculation", 
-                            ["PAYE Calculation", "UIF Calculation", "SDL Calculation", 
+                            ["Multiple Employee Calculation", "PAYE Calculation", "UIF Calculation", "SDL Calculation", 
                              "VAT Calculation", "Progressive Tax Calculation", 
                              "Fringe Benefits Calculation", "What-If Analysis", 
                              "Generate Financial Statements"])
 
-    if menu == "PAYE Calculation":
+    if menu == "Multiple Employee Calculation":
+        st.header("Multiple Employee Calculation")
+
+        number_of_employees = st.number_input("Number of Employees", min_value=1, value=1, step=1)
+        employee_data = []
+
+        for i in range(int(number_of_employees)):
+            with st.expander(f"Employee {i+1} Details"):
+                employee_name = st.text_input(f"Employee {i+1} Name", value=f"Employee {i+1}")
+                gross_salary = st.number_input(f"Gross Salary (Employee {i+1})", min_value=0.0, value=0.0)
+                allowances = st.number_input(f"Allowances (Employee {i+1})", min_value=0.0, value=0.0)
+                fringe_benefits = st.number_input(f"Fringe Benefits (Employee {i+1})", min_value=0.0, value=0.0)
+                retirement_deductions = st.number_input(f"Retirement Fund Contributions (Employee {i+1})", min_value=0.0, value=0.0)
+                medical_credits = st.number_input(f"Medical Aid Tax Credits (Employee {i+1})", min_value=0.0, value=0.0)
+                tax_rate = st.slider(f"Tax Rate (Employee {i+1}) (%)", min_value=0.0, max_value=45.0, value=26.0)
+                rebates = st.number_input(f"Rebates (Employee {i+1})", min_value=0.0, value=0.0)
+                
+                employee_data.append({
+                    "Employee Name": employee_name,
+                    "Gross Salary": gross_salary,
+                    "Allowances": allowances,
+                    "Fringe Benefits": fringe_benefits,
+                    "Retirement Deductions": retirement_deductions,
+                    "Medical Credits": medical_credits,
+                    "Tax Rate": tax_rate,
+                    "Rebates": rebates
+                })
+
+        if st.button("Calculate for All Employees"):
+            result_df = process_multiple_employees(employee_data)
+            st.dataframe(result_df)
+            st.success("Calculations completed for all employees.")
+
+    elif menu == "PAYE Calculation":
         st.header("PAYE Calculation")
         gross_salary = st.number_input("Gross Salary", min_value=0.0, value=0.0)
         allowances = st.number_input("Allowances", min_value=0.0, value=0.0)
@@ -85,8 +145,8 @@ def main():
         st.header("UIF Calculation")
         gross_salary = st.number_input("Gross Salary", min_value=0.0, value=0.0)
         if st.button("Calculate UIF"):
-            uif = calculate_uif(gross_salary)
-            st.success(f"Total UIF Contribution: R{uif}")
+            total_uif, employee_uif, employer_uif = calculate_uif(gross_salary)
+            st.success(f"Total UIF Contribution: R{total_uif} (Employee: R{employee_uif}, Employer: R{employer_uif})")
 
     elif menu == "SDL Calculation":
         st.header("SDL Calculation")
@@ -242,4 +302,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
