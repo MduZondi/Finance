@@ -198,74 +198,213 @@ def main():
 
         if statement_type == "Income Statement":
             st.subheader("Income Statement")
-            revenue = st.number_input("Total Revenue (Sales + Other Income)", min_value=0.0)
-            cogs = st.number_input("Cost of Goods Sold (COGS)", min_value=0.0)
-            salaries = st.number_input("Salaries", min_value=0.0)
-            rent = st.number_input("Rent", min_value=0.0)
-            utilities = st.number_input("Utilities", min_value=0.0)
-            depreciation = st.number_input("Depreciation", min_value=0.0)
-            interest_expense = st.number_input("Interest Expense", min_value=0.0)
-            tax_expense = st.number_input("Tax Expense", min_value=0.0)
 
-            gross_profit = revenue - cogs
-            total_operating_expenses = salaries + rent + utilities + depreciation
+            # Revenue Section
+            st.markdown("### Revenue")
+            sales_revenue = st.number_input("Sales Revenue", min_value=0.0, key="sales_revenue")
+            service_revenue = st.number_input("Service Revenue", min_value=0.0, key="service_revenue")
+            rental_income = st.number_input("Rental Income", min_value=0.0, key="rental_income")
+            interest_income = st.number_input("Interest Income", min_value=0.0, key="interest_income_revenue")
+            sales_returns_allowances = st.number_input("Less: Sales Returns and Allowances", min_value=0.0, key="sales_returns_allowances")
+
+            # Calculating Net Sales
+            net_sales = sales_revenue + service_revenue + rental_income + interest_income - sales_returns_allowances
+
+            # Cost of Goods Sold (COGS) Section
+            st.markdown("### Cost of Goods Sold (COGS)")
+            beginning_inventory = st.number_input("Beginning Inventory", min_value=0.0, key="beginning_inventory")
+            purchases = st.number_input("Plus: Purchases", min_value=0.0, key="purchases")
+            freight_in = st.number_input("Freight-In", min_value=0.0, key="freight_in")
+            import_duties = st.number_input("Import Duties", min_value=0.0, key="import_duties")
+            ending_inventory = st.number_input("Less: Ending Inventory", min_value=0.0, key="ending_inventory")
+
+            # Calculating COGS
+            cogs = beginning_inventory + purchases + freight_in + import_duties - ending_inventory
+
+            # Calculating Gross Profit
+            gross_profit = net_sales - cogs
+
+            # Operating Expenses Section
+            st.markdown("### Operating Expenses")
+
+            # Selling Expenses
+            st.markdown("#### Selling Expenses")
+            advertising = st.number_input("Advertising", min_value=0.0, key="advertising")
+            sales_salaries = st.number_input("Sales Salaries and Wages", min_value=0.0, key="sales_salaries")
+            store_supplies = st.number_input("Store Supplies", min_value=0.0, key="store_supplies")
+            transport_costs = st.number_input("Transport Costs", min_value=0.0, key="transport_costs")
+            bad_debts_expense = st.number_input("Bad Debts Expense", min_value=0.0, key="bad_debts_expense")
+
+            # General and Administrative Expenses
+            st.markdown("#### General and Administrative Expenses")
+            office_salaries = st.number_input("Office Salaries and Wages", min_value=0.0, key="office_salaries")
+            rent = st.number_input("Rent", min_value=0.0, key="rent")
+            utilities = st.number_input("Utilities", min_value=0.0, key="utilities")
+            depreciation = st.number_input("Depreciation", min_value=0.0, key="depreciation")
+            legal_accounting_fees = st.number_input("Legal and Accounting Fees", min_value=0.0, key="legal_accounting_fees")
+            security_services = st.number_input("Security Services", min_value=0.0, key="security_services")
+            repairs_maintenance = st.number_input("Repairs and Maintenance", min_value=0.0, key="repairs_maintenance")
+            telephone_internet = st.number_input("Telephone and Internet", min_value=0.0, key="telephone_internet")
+            insurance = st.number_input("Insurance", min_value=0.0, key="insurance")
+            rates_taxes = st.number_input("Rates and Taxes", min_value=0.0, key="rates_taxes")
+            employee_benefits = st.number_input("Employee Benefits", min_value=0.0, key="employee_benefits")
+            training_development = st.number_input("Training and Development", min_value=0.0, key="training_development")
+
+            # Calculating Total Operating Expenses
+            total_selling_expenses = advertising + sales_salaries + store_supplies + transport_costs + bad_debts_expense
+            total_general_admin_expenses = (office_salaries + rent + utilities + depreciation + legal_accounting_fees +
+                                            security_services + repairs_maintenance + telephone_internet + insurance +
+                                            rates_taxes + employee_benefits + training_development)
+            total_operating_expenses = total_selling_expenses + total_general_admin_expenses
+
+            # Calculating Operating Income
             operating_income = gross_profit - total_operating_expenses
-            net_income_before_taxes = operating_income - interest_expense
-            net_income_after_taxes = net_income_before_taxes - tax_expense
 
+            # Other Income and Expenses
+            st.markdown("### Other Income and Expenses")
+            interest_income_other = st.number_input("Interest Income", min_value=0.0, key="interest_income_other")
+            interest_expense = st.number_input("Interest Expense", min_value=0.0, key="interest_expense")
+
+            # Calculating Net Other Income
+            net_other_income = interest_income_other - interest_expense
+
+            # Calculating Earnings Before Tax (EBT) and Net Income
+            earnings_before_tax = operating_income + net_other_income
+            tax_expense = st.number_input("Income Tax Expense", min_value=0.0, key="tax_expense")
+            net_income = earnings_before_tax - tax_expense
+
+            # Preparing Data for Display and Export
             income_statement_data = {
-                "Total Revenue": revenue,
-                "Cost of Goods Sold": cogs,
+                "Net Sales": net_sales,
+                "COGS": cogs,
                 "Gross Profit": gross_profit,
+                "Total Selling Expenses": total_selling_expenses,
+                "Total General and Administrative Expenses": total_general_admin_expenses,
                 "Total Operating Expenses": total_operating_expenses,
                 "Operating Income": operating_income,
+                "Interest Income": interest_income_other,
                 "Interest Expense": interest_expense,
-                "Net Income Before Taxes": net_income_before_taxes,
-                "Tax Expense": tax_expense,
-                "Net Income After Taxes": net_income_after_taxes
+                "Net Other Income": net_other_income,
+                "Earnings Before Tax (EBT)": earnings_before_tax,
+                "Income Tax Expense": tax_expense,
+                "Net Income": net_income
             }
 
+            # Displaying the Income Statement Results
             st.subheader("Income Statement Results")
+            st.write(f"Net Sales: {net_sales}")
             st.write(f"Gross Profit: {gross_profit}")
             st.write(f"Operating Income: {operating_income}")
-            st.write(f"Net Income Before Taxes: {net_income_before_taxes}")
-            st.write(f"Net Income After Taxes: {net_income_after_taxes}")
+            st.write(f"Earnings Before Tax (EBT): {earnings_before_tax}")
+            st.write(f"Net Income: {net_income}")
 
+            # Export to Excel
             if st.button("Export to Excel"):
                 df = create_dataframe(list(income_statement_data.values()), list(income_statement_data.keys()))
-                df.to_excel("Income_Statement.xlsx", index=False)
+                df.to_excel("Income_Statement_Detailed.xlsx", index=False)
                 st.success("Income Statement exported to Excel successfully!")
+
+
 
         elif statement_type == "Balance Sheet":
             st.subheader("Balance Sheet")
-            current_assets = st.number_input("Total Current Assets", min_value=0.0)
-            non_current_assets = st.number_input("Total Non-Current Assets", min_value=0.0)
-            current_liabilities = st.number_input("Total Current Liabilities", min_value=0.0)
-            non_current_liabilities = st.number_input("Total Non-Current Liabilities", min_value=0.0)
 
-            total_assets = current_assets + non_current_assets
-            total_liabilities = current_liabilities + non_current_liabilities
-            shareholders_equity = total_assets - total_liabilities
+            # Assets Section
+            st.markdown("### Assets")
 
+            # Current Assets
+            st.markdown("#### Current Assets")
+            cash_equivalents = st.number_input("Cash and Cash Equivalents", min_value=0.0, key="cash_equivalents")
+            accounts_receivable = st.number_input("Accounts Receivable", min_value=0.0, key="accounts_receivable")
+            inventory = st.number_input("Inventory", min_value=0.0, key="inventory")
+            prepaid_expenses = st.number_input("Prepaid Expenses", min_value=0.0, key="prepaid_expenses")
+            other_receivables = st.number_input("Other Receivables", min_value=0.0, key="other_receivables")
+
+            # Calculating Total Current Assets
+            total_current_assets = (cash_equivalents + accounts_receivable + inventory +
+                                    prepaid_expenses + other_receivables)
+
+            # Non-Current Assets
+            st.markdown("#### Non-Current Assets")
+            ppe = st.number_input("Property, Plant, and Equipment (PPE)", min_value=0.0, key="ppe")
+            intangible_assets = st.number_input("Intangible Assets", min_value=0.0, key="intangible_assets")
+            investments = st.number_input("Investments", min_value=0.0, key="investments")
+            deferred_tax_assets = st.number_input("Deferred Tax Assets", min_value=0.0, key="deferred_tax_assets")
+
+            # Calculating Total Non-Current Assets
+            total_non_current_assets = ppe + intangible_assets + investments + deferred_tax_assets
+
+            # Calculating Total Assets
+            total_assets = total_current_assets + total_non_current_assets
+
+            # Liabilities Section
+            st.markdown("### Liabilities")
+
+            # Current Liabilities
+            st.markdown("#### Current Liabilities")
+            accounts_payable = st.number_input("Accounts Payable", min_value=0.0, key="accounts_payable")
+            short_term_borrowings = st.number_input("Short-Term Borrowings", min_value=0.0, key="short_term_borrowings")
+            accrued_expenses = st.number_input("Accrued Expenses", min_value=0.0, key="accrued_expenses")
+            current_portion_long_term_debt = st.number_input("Current Portion of Long-Term Debt", min_value=0.0, key="current_portion_long_term_debt")
+            income_taxes_payable = st.number_input("Income Taxes Payable", min_value=0.0, key="income_taxes_payable")
+            vat_payable = st.number_input("VAT Payable", min_value=0.0, key="vat_payable")
+            other_payables = st.number_input("Other Payables", min_value=0.0, key="other_payables")
+
+            # Calculating Total Current Liabilities
+            total_current_liabilities = (accounts_payable + short_term_borrowings + accrued_expenses +
+                                        current_portion_long_term_debt + income_taxes_payable +
+                                        vat_payable + other_payables)
+
+            # Non-Current Liabilities
+            st.markdown("#### Non-Current Liabilities")
+            long_term_debt = st.number_input("Long-Term Debt", min_value=0.0, key="long_term_debt")
+            deferred_tax_liabilities = st.number_input("Deferred Tax Liabilities", min_value=0.0, key="deferred_tax_liabilities")
+            provisions = st.number_input("Provisions", min_value=0.0, key="provisions")
+            other_non_current_liabilities = st.number_input("Other Non-Current Liabilities", min_value=0.0, key="other_non_current_liabilities")
+
+            # Calculating Total Non-Current Liabilities
+            total_non_current_liabilities = (long_term_debt + deferred_tax_liabilities +
+                                            provisions + other_non_current_liabilities)
+
+            # Calculating Total Liabilities
+            total_liabilities = total_current_liabilities + total_non_current_liabilities
+
+            # Shareholders' Equity Section
+            st.markdown("### Shareholders' Equity")
+            share_capital = st.number_input("Share Capital", min_value=0.0, key="share_capital")
+            retained_earnings = st.number_input("Retained Earnings", min_value=0.0, key="retained_earnings")
+            revaluation_surplus = st.number_input("Revaluation Surplus", min_value=0.0, key="revaluation_surplus")
+            other_reserves = st.number_input("Other Reserves", min_value=0.0, key="other_reserves")
+            non_controlling_interest = st.number_input("Non-Controlling Interest", min_value=0.0, key="non_controlling_interest")
+
+            # Calculating Total Shareholders' Equity
+            total_shareholders_equity = (share_capital + retained_earnings + revaluation_surplus +
+                                        other_reserves + non_controlling_interest)
+
+            # Preparing Data for Display and Export
             balance_sheet_data = {
-                "Total Current Assets": current_assets,
-                "Total Non-Current Assets": non_current_assets,
+                "Total Current Assets": total_current_assets,
+                "Total Non-Current Assets": total_non_current_assets,
                 "Total Assets": total_assets,
-                "Total Current Liabilities": current_liabilities,
-                "Total Non-Current Liabilities": non_current_liabilities,
+                "Total Current Liabilities": total_current_liabilities,
+                "Total Non-Current Liabilities": total_non_current_liabilities,
                 "Total Liabilities": total_liabilities,
-                "Shareholders' Equity": shareholders_equity
+                "Total Shareholders' Equity": total_shareholders_equity
             }
 
+            # Displaying the Balance Sheet Results
             st.subheader("Balance Sheet Results")
             st.write(f"Total Assets: {total_assets}")
             st.write(f"Total Liabilities: {total_liabilities}")
-            st.write(f"Shareholders' Equity: {shareholders_equity}")
+            st.write(f"Shareholders' Equity: {total_shareholders_equity}")
 
+            # Export to Excel
             if st.button("Export Balance Sheet to Excel"):
                 df = create_dataframe(list(balance_sheet_data.values()), list(balance_sheet_data.keys()))
-                df.to_excel("Balance_Sheet.xlsx", index=False)
+                df.to_excel("Balance_Sheet_Detailed.xlsx", index=False)
                 st.success("Balance Sheet exported to Excel successfully!")
+
+
 
         elif statement_type == "Cash Flow Statement":
             st.subheader("Cash Flow Statement")
